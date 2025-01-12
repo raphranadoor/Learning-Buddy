@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning Buddy</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 40px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    textarea {
+      width: 100%;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .response {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f4f4f4;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Learning Buddy</h1>
+    <form id="promptForm">
+      <textarea id="promptInput" placeholder="Enter your question here..."></textarea>
+      <button type="submit">Send</button>
+    </form>
+    <div id="responseContainer" class="response" style="display: none;"></div>
+    <div id="errorContainer" class="error" style="display: none;"></div>
+  </div>
+
+  <script>
+    console.log('Script loaded'); // Debugging statement
+
+    const form = document.getElementById('promptForm');
+    const responseContainer = document.getElementById('responseContainer');
+    const errorContainer = document.getElementById('errorContainer');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      errorContainer.style.display = 'none';
+      responseContainer.style.display = 'none';
+
+      const prompt = document.getElementById('promptInput').value.trim();
+      if (!prompt) {
+        errorContainer.style.display = 'block';
+        errorContainer.textContent = 'Prompt cannot be empty.';
+        return;
+      }
+
+      console.log('Form submitted'); // Debugging statement
+      console.log('Prompt:', prompt); // Debugging statement
+
+      try {
+        const payload = JSON.stringify({ prompt: prompt });
+        console.log('Payload:', payload); // Debugging statement
+
+        const response = await fetch('/get_response', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: payload, // Ensure payload is correctly formatted
+        });
+
+        const data = await response.json();
+        console.log('Response data:', data); // Debugging statement
+
+        if (response.ok) {
+          responseContainer.style.display = 'block';
+          responseContainer.innerHTML = data.response; // Use innerHTML to render <br> tags
+        } else {
+          responseContainer.style.display = 'block';
+          responseContainer.innerHTML = data.error || 'An error occurred.'; // Use innerHTML to render <br> tags
+        }
+      } catch (error) {
+        console.error('Fetch error:', error); // Debugging statement
+        errorContainer.style.display = 'block';
+        errorContainer.textContent = 'Unable to connect to the server. Please try again later.';
+      }
+    });
+  </script>
+</body>
+</html>
